@@ -8,10 +8,9 @@ import { Modal, Button, Input } from "antd";
 import { TbLogout2 } from "react-icons/tb";
 
 function Dashboard() {
-
-  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL; 
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { userId, logout } = useAuth();
   const [etfs, setEtfs] = useState([]);
   const [formData, setFormData] = useState({ name: "", link: "" });
   const [editingId, setEditingId] = useState(null);
@@ -23,7 +22,6 @@ function Dashboard() {
 
   const fetchEtfs = async () => {
     try {
-      const userId = localStorage.getItem("userId");
       const response = await axios.get(`${apiBaseUrl}/api/etfs`, {
         params: { userId },
       });
@@ -34,9 +32,7 @@ function Dashboard() {
   };
 
   const handleSubmit = async () => {
- 
     try {
-      const userId = localStorage.getItem("userId");
       if (editingId) {
         await axios.put(`${apiBaseUrl}/api/etfs/${editingId}`, {
           ...formData,
@@ -80,8 +76,6 @@ function Dashboard() {
 
   const handleLogout = () => {
     logout();
-    localStorage.removeItem("isAuthenticated");
-    localStorage.removeItem("userId");
     navigate("/login");
   };
 
@@ -99,7 +93,7 @@ function Dashboard() {
           <div className="flex items-center space-x-4">
             <Button
               type="primary"
-              onClick={() => setIsModalVisible(true)} 
+              onClick={() => setIsModalVisible(true)}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
               Add ETF
@@ -167,7 +161,7 @@ function Dashboard() {
           }
           open={isModalVisible}
           onCancel={handleModalCancel}
-          footer={null} 
+          footer={null}
         >
           <form
             onSubmit={(e) => {

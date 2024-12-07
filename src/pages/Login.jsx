@@ -22,10 +22,7 @@ function Login() {
       );
       const { userId } = response.data;
 
-      localStorage.setItem("userId", userId);
-      localStorage.setItem("isAuthenticated", "true");
-
-      login();
+      login(userId);
       toast.success("Login successful!");
       navigate("/");
     } catch (error) {
