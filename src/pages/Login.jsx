@@ -1,33 +1,42 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
-import toast from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import toast from "react-hot-toast";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
-
   const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
   const navigate = useNavigate();
   const { login } = useAuth();
   const [formData, setFormData] = useState({
-    username: '',
-    password: '',
+    username: "",
+    password: "",
   });
+
+  useEffect(() => {
+    const isAuthenticated = localStorage.getItem("isAuthenticated");
+    if (isAuthenticated === "true") {
+      navigate("/");
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(`${apiBaseUrl}/api/auth/login`, formData);
+      const response = await axios.post(
+        `${apiBaseUrl}/api/auth/login`,
+        formData
+      );
       const { userId } = response.data;
 
-      localStorage.setItem('userId', userId);
-      localStorage.setItem('isAuthenticated', 'true');
-      
+      localStorage.setItem("userId", userId);
+      localStorage.setItem("isAuthenticated", "true");
+
       login();
-      toast.success('Login successful!');
-      navigate('/');
+      toast.success("Login successful!");
+      navigate("/");
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed');
+      toast.error(error.response?.data?.message || "Login failed");
     }
   };
 
@@ -41,7 +50,10 @@ function Login() {
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="username"
+              className="block text-sm font-medium text-gray-700"
+            >
               Username
             </label>
             <input
@@ -51,11 +63,16 @@ function Login() {
               required
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               value={formData.username}
-              onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, username: e.target.value })
+              }
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </label>
             <input
@@ -65,7 +82,9 @@ function Login() {
               required
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
               value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
             />
           </div>
           <div>
@@ -78,7 +97,10 @@ function Login() {
           </div>
         </form>
         <div className="text-center">
-          <Link to="/register" className="text-indigo-600 hover:text-indigo-500">
+          <Link
+            to="/register"
+            className="text-indigo-600 hover:text-indigo-500"
+          >
             Don't have an account? Register
           </Link>
         </div>
