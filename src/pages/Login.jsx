@@ -13,13 +13,6 @@ function Login() {
     password: "",
   });
 
-  useEffect(() => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated");
-    if (isAuthenticated === "true") {
-      navigate("/");
-    }
-  }, [navigate]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
