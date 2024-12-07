@@ -48,7 +48,7 @@ function Dashboard() {
           ...formData,
           userId,
         });
-        toast.success("ETF added successfully");
+        toast.success("ETF added successfully!");
       }
       setFormData({ name: "", link: "" });
       setEditingId(null);
