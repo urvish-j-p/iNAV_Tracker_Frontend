@@ -110,46 +110,54 @@ function Dashboard() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    ETF Name
+                  <th className="px-6 py-3 text-left sm:text-center text-xl font-medium text-gray-500 tracking-wider lg:w-1/2 lg:text-center">
+                    ETFs
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {/* Actions Header */}
+                  <th className="px-6 py-3 mr-3 text-right sm:text-center text-xl font-medium text-gray-500 tracking-wider lg:w-1/2 lg:text-center">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {etfs.map((etf) => (
-                  <tr key={etf._id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <a
-                        href={etf.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-indigo-600 hover:text-indigo-900 flex items-center"
-                      >
-                        {etf.name}
-                        <FiExternalLink className="ml-2" />
-                      </a>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <button
-                        onClick={() => handleEdit(etf)}
-                        className="text-indigo-600 hover:text-indigo-900 mr-4"
-                      >
-                        <FiEdit2 />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(etf._id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <FiTrash2 />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
             </table>
+            <div className="overflow-y-auto max-h-[calc(100vh-160px)] custom-scrollbar">
+              <table className="min-w-full divide-y divide-gray-200">
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {etfs.map((etf) => (
+                    <tr key={etf._id}>
+                      {/* ETFs Column */}
+                      <td className="px-6 py-4 sm:px-36 whitespace-nowrap text-left lg:w-1/2 lg:text-center">
+                        <a
+                          href={etf.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-600 hover:text-indigo-900 flex items-center justify-start lg:justify-center text-wrap space-x-2"
+                        >
+                          <span className="whitespace-normal">{etf.name}</span>
+                          <FiExternalLink className="ml-2 flex-shrink-0" />
+                        </a>
+                      </td>
+
+                      {/* Actions Column */}
+                      <td className="whitespace-nowrap text-right px-10 sm:px-40 lg:w-1/2 lg:text-center">
+                        <button
+                          onClick={() => handleEdit(etf)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-4"
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(etf._id)}
+                          className="text-red-600 hover:text-red-900"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
