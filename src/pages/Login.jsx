@@ -31,11 +31,14 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 flex-col">
+      <div className="font-extrabold text-indigo-600 text-3xl mb-5">
+        i-NAV Tracker
+      </div>
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
         <div>
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            Login to i-NAV Tracker
+          <h2 className="text-center text-2xl font-extrabold text-gray-900">
+            Login
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
