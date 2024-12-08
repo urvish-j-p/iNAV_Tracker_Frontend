@@ -113,10 +113,10 @@ function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md">
+        <div className="bg-white rounded-lg shadow-lg">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+              <thead className="bg-gray-100">
                 <tr>
                   <th className="px-6 py-3 text-left sm:text-center text-xl font-medium text-gray-500 tracking-wider lg:w-1/2 lg:text-center">
                     {etfs?.length === 1 ? "ETF" : "ETFs"}
