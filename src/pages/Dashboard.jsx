@@ -93,7 +93,7 @@ function Dashboard() {
     <div className="min-h-screen bg-gray-50 py-6 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">i-NAV Tracker</h1>
+          <h1 className="text-3xl font-bold text-indigo-600">i-NAV Tracker</h1>
           <div className="flex items-center space-x-4">
             <Button
               type="primary"

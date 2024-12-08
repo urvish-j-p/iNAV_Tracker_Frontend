@@ -1,9 +1,8 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast';
-import Register from './pages/Register';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import AuthForm from "./pages/AuthForm";
+import Dashboard from "./pages/Dashboard";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const PrivateRoute = ({ children }) => {
   const { isAuthenticated } = useAuth();
@@ -16,8 +15,8 @@ function App() {
       <BrowserRouter>
         <Toaster position="top-center" />
         <Routes>
-          <Route path="/register" element={<Register />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<AuthForm isLogin={false} />} />
+          <Route path="/login" element={<AuthForm isLogin={true} />} />
           <Route
             path="/"
             element={
