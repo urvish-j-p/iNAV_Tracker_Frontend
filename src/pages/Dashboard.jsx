@@ -198,7 +198,7 @@ function Dashboard() {
               <thead className="bg-gray-100">
                 <tr>
                   <th className="px-6 py-3 text-left text-xl font-medium text-gray-500">
-                    ETF Name
+                    ETF
                   </th>
                   <th className="px-6 py-3 text-left text-xl font-medium text-gray-500">
                     CMP
