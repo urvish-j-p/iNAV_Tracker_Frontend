@@ -12,25 +12,14 @@ function Dashboard() {
   const navigate = useNavigate();
   const { userId, logout } = useAuth();
   const [etfs, setEtfs] = useState([]);
+  const [formData, setFormData] = useState({ name: "", link: "" });
   const [editingId, setEditingId] = useState(null);
-  const [addModalVisible, setAddModalVisible] = useState(false);
-  const [editModalVisible, setEditModalVisible] = useState(false);
-  const [formData, setFormData] = useState({ name: "" });
+  const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [searchResults, setSearchResults] = useState([]); // Holds search results for Add Modal
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedEtf, setSelectedEtf] = useState(null);
-  const [nseData, setNseData] = useState({});
 
   useEffect(() => {
     fetchEtfs();
   }, []);
-
-  useEffect(() => {
-    if (etfs.length > 0) {
-      fetchNseDataForEtfs();
-    }
-  }, [etfs]);
 
   const fetchEtfs = async () => {
     try {
@@ -45,101 +34,34 @@ function Dashboard() {
     }
   };
 
-  const fetchNseDataForEtfs = async () => {
-    const newNseData = {};
-
-    await Promise.all(
-      etfs.map(async (etf) => {
-        try {
-          const response = await axios.get(`${apiBaseUrl}/api/etfs/nse-data`, {
-            params: { symbol: etf.symbol },
-          });
-
-          const { lastPrice, iNavValue } = response.data;
-
-          // Store the data for the current ETF
-          newNseData[etf.symbol] = { lastPrice, iNavValue };
-        } catch (error) {
-          console.error(`Failed to fetch NSE data for ${etf.symbol}`, error);
-        }
-      })
-    );
-
-    setNseData(newNseData); // Update state with all fetched NSE data
-  };
-
-  console.log("etfs: ", etfs);
-
-  const handleSearchChange = async (value) => {
-    const trimmedValue = value.trim();
-    setSearchTerm(value); // Update the search term state with the original value
-
-    if (trimmedValue === "") {
-      setSearchResults([]); // Clear search results if search term is empty
-      setSelectedEtf(null); // Clear selected ETF state
-      return;
-    }
-
+  const handleSubmit = async () => {
     try {
-      const response = await axios.get(`${apiBaseUrl}/api/etfs/search`, {
-        params: { query: trimmedValue },
-      });
-
-      const filteredResults = response.data; // The backend already filters by "ETF"
-      setSearchResults(filteredResults);
-
-      if (filteredResults.length === 0) {
-        setSelectedEtf(null); // Clear selected ETF if no search results
+      if (editingId) {
+        await axios.put(`${apiBaseUrl}/api/etfs/${editingId}`, {
+          ...formData,
+          userId,
+        });
+        toast.success("ETF updated successfully!");
+      } else {
+        await axios.post(`${apiBaseUrl}/api/etfs`, {
+          ...formData,
+          userId,
+        });
+        toast.success("ETF added successfully!");
       }
-    } catch (error) {
-      setSearchResults([]); // Clear search results on error
-      setSelectedEtf(null); // Clear selected ETF on error
-      toast.error("Failed to fetch search results!");
-    }
-  };
-
-  // Handle adding a new ETF
-  const handleAdd = async () => {
-    if (!selectedEtf) {
-      toast.error("Please select an ETF before adding!");
-      return;
-    }
-    try {
-      await axios.post(`${apiBaseUrl}/api/etfs`, {
-        name: selectedEtf.title,
-        symbol: selectedEtf.nse_scrip_code,
-        userId,
-      });
-      toast.success("ETF added successfully!");
-      handleModalClose(); // Clear modal state and close
-      fetchEtfs(); // Refresh ETF list
+      setFormData({ name: "", link: "" });
+      setEditingId(null);
+      setIsModalVisible(false);
+      fetchEtfs();
     } catch (error) {
       toast.error(error.response?.data?.message || "Operation failed");
     }
   };
 
-  // Open Edit Modal and populate form data
   const handleEdit = (etf) => {
-    setFormData({ name: etf.name }); // Set the current ETF name in the form
-    setEditingId(etf._id); // Set the ETF ID for editing
-    setEditModalVisible(true); // Open Edit Modal
-  };
-
-  // Handle submitting edited ETF
-  const handleEditSubmit = async () => {
-    try {
-      await axios.put(`${apiBaseUrl}/api/etfs/${editingId}`, {
-        name: formData.name,
-        userId,
-      });
-      toast.success("ETF updated successfully!");
-      setFormData({ name: "" }); // Clear form data
-      setEditingId(null); // Clear editing ID
-      setEditModalVisible(false); // Close Edit Modal
-      fetchEtfs(); // Refresh ETF list
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Operation failed");
-    }
+    setFormData({ name: etf.name, link: etf.link });
+    setEditingId(etf._id);
+    setIsModalVisible(true);
   };
 
   const handleDelete = async (id) => {
@@ -161,11 +83,10 @@ function Dashboard() {
     toast.success("You have been logged out!");
   };
 
-  const handleModalClose = () => {
-    setAddModalVisible(false);
-    setSearchResults([]);
-    setSearchTerm("");
-    setSelectedEtf(null);
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+    setFormData({ name: "", link: "" });
+    setEditingId(null);
   };
 
   return (
@@ -176,7 +97,7 @@ function Dashboard() {
           <div className="flex items-center space-x-4">
             <Button
               type="primary"
-              onClick={() => setAddModalVisible(true)}
+              onClick={() => setIsModalVisible(true)}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
               Add ETF
@@ -197,16 +118,10 @@ function Dashboard() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xl font-medium text-gray-500">
-                    ETF
+                  <th className="px-6 py-3 text-left sm:text-center text-xl font-medium text-gray-500 tracking-wider lg:w-1/2 lg:text-center">
+                    {etfs?.length === 1 ? "ETF" : "ETFs"}
                   </th>
-                  <th className="px-6 py-3 text-left text-xl font-medium text-gray-500">
-                    CMP
-                  </th>
-                  <th className="px-6 py-3 text-left text-xl font-medium text-gray-500">
-                    i-NAV
-                  </th>
-                  <th className="px-6 py-3 text-right text-xl font-medium text-gray-500">
+                  <th className="px-6 py-3 mr-3 text-right sm:text-center text-xl font-medium text-gray-500 tracking-wider lg:w-1/2 lg:text-center">
                     Actions
                   </th>
                 </tr>
@@ -226,21 +141,23 @@ function Dashboard() {
                   <tbody className="bg-white divide-y divide-gray-200">
                     {etfs.map((etf) => (
                       <tr key={etf._id}>
-                        {/* ETF Name */}
-                        <td className="px-6 py-4 text-left">{etf.name}</td>
-
-                        {/* CMP */}
-                        <td className="px-6 py-4 text-left">
-                          {nseData[etf.symbol]?.lastPrice || "Loading..."}
+                        {/* ETFs Column */}
+                        <td className="px-6 py-4 sm:px-36 whitespace-nowrap text-left lg:w-1/2 lg:text-center">
+                          <a
+                            href={etf.link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-indigo-600 hover:text-indigo-900 flex items-center justify-start lg:justify-center text-wrap space-x-2"
+                          >
+                            <span className="whitespace-normal">
+                              {etf.name}
+                            </span>
+                            <FiExternalLink className="ml-2 flex-shrink-0" />
+                          </a>
                         </td>
 
-                        {/* i-NAV */}
-                        <td className="px-6 py-4 text-left">
-                          {nseData[etf.symbol]?.iNavValue || "Loading..."}
-                        </td>
-
-                        {/* Actions */}
-                        <td className="px-6 py-4 text-right">
+                        {/* Actions Column */}
+                        <td className="whitespace-nowrap text-right px-10 sm:px-40 lg:w-1/2 lg:text-center">
                           <button
                             onClick={() => handleEdit(etf)}
                             className="text-indigo-600 hover:text-indigo-900 mr-4"
@@ -267,67 +184,60 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* Add Modal */}
         <Modal
-          title="Add ETF"
-          open={addModalVisible}
-          onCancel={handleModalClose}
+          title={
+            <div style={{ textAlign: "center" }}>
+              {editingId ? "Edit ETF" : "Add ETF"}
+            </div>
+          }
+          open={isModalVisible}
+          onCancel={handleModalCancel}
           footer={null}
         >
-          <Input
-            placeholder="Search ETF by name or symbol"
-            value={searchTerm}
-            onChange={(e) => handleSearchChange(e.target.value)}
-          />
-          <div className="mt-4">
-            {searchResults.map((etf) => (
-              <div
-                key={etf.id}
-                onClick={() => setSelectedEtf(etf)} // Set selected ETF
-                className={`p-2 rounded-md mb-2 cursor-pointer ${
-                  selectedEtf?.id === etf.id
-                    ? "bg-indigo-100"
-                    : "bg-gray-100 hover:bg-gray-200"
-                }`}
-              >
-                {etf.title} ({etf.nse_scrip_code})
-              </div>
-            ))}
-          </div>
-          {selectedEtf &&
-            searchTerm.trim() !== "" &&
-            searchResults.some((etf) => etf.id === selectedEtf.id) && (
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSubmit();
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                ETF Name
+              </label>
+              <Input
+                type="text"
+                required
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                ETF Link
+              </label>
+              <Input
+                type="url"
+                required
+                value={formData.link}
+                onChange={(e) =>
+                  setFormData({ ...formData, link: e.target.value })
+                }
+              />
+            </div>
+            <div className="mt-4">
               <Button
                 type="primary"
-                className="mt-4 bg-indigo-600"
+                htmlType="submit"
                 block
-                onClick={handleAdd} // Call API to add ETF
+                className="bg-indigo-600 text-white hover:bg-indigo-700"
               >
-                Add
+                {editingId ? "Update ETF" : "Add ETF"}
               </Button>
-            )}
-        </Modal>
-
-        {/* Edit Modal */}
-        <Modal
-          title="Edit ETF Name"
-          open={editModalVisible}
-          onCancel={() => setEditModalVisible(false)}
-          footer={null}
-        >
-          <Input
-            placeholder="ETF Name"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })} // Update form data on input
-          />
-          <Button
-            type="primary"
-            block
-            className="mt-4"
-            onClick={handleEditSubmit} // Submit updated ETF
-          >
-            Update
-          </Button>
+            </div>
+          </form>
         </Modal>
       </div>
     </div>
