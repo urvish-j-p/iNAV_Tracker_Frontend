@@ -17,6 +17,7 @@ function Dashboard() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [options, setOptions] = useState([]);
+  const [searchValue, setSearchValue] = useState("");
 
   useEffect(() => {
     fetchEtfs();
@@ -36,7 +37,11 @@ function Dashboard() {
   };
 
   const handleSearch = async (query) => {
-    if (!query) return;
+    setSearchValue(query);
+    if (!query) {
+      setOptions([]);
+      return;
+    }
     try {
       const { data } = await axios.get(`${apiBaseUrl}/api/etfs/search-etf`, {
         params: { query },
@@ -61,6 +66,7 @@ function Dashboard() {
       name: etfData.title,
       link: etfData.nse_scrip_code || "",
     });
+    setSearchValue(value);
   };
 
   const handleSubmit = async () => {
@@ -81,6 +87,8 @@ function Dashboard() {
       setFormData({ name: "", link: "" });
       setEditingId(null);
       setIsModalVisible(false);
+      setOptions([]); // Clear options after successful submit
+      setSearchValue(""); // Clear search value
       fetchEtfs();
     } catch (error) {
       toast.error(error.response?.data?.message || "Operation failed");
@@ -90,6 +98,8 @@ function Dashboard() {
   const handleEdit = (etf) => {
     setFormData({ name: etf.name, link: etf.link });
     setEditingId(etf._id);
+    setOptions([]); // Clear options when editing
+    setSearchValue(""); // Clear search value when editing
     setIsModalVisible(true);
   };
 
@@ -116,11 +126,20 @@ function Dashboard() {
     setIsModalVisible(false);
     setFormData({ name: "", link: "" });
     setEditingId(null);
-    setOptions([]);
+    setOptions([]); // Clear options when modal is cancelled
+    setSearchValue(""); // Clear search value when modal is cancelled
+  };
+
+  const handleAddETF = () => {
+    setFormData({ name: "", link: "" });
+    setEditingId(null);
+    setOptions([]); // Clear options when adding new ETF
+    setSearchValue(""); // Clear search value when adding new ETF
+    setIsModalVisible(true);
   };
 
   const getSuggestion = (lastPrice, iNavValue) => {
-    if (lastPrice == null || iNavValue == null) return "--";
+    if (lastPrice == null || iNavValue == null) return "-";
     return lastPrice <= iNavValue ? "Buy" : "Wait";
   };
 
@@ -132,7 +151,7 @@ function Dashboard() {
           <div className="flex items-center space-x-4">
             <Button
               type="primary"
-              onClick={() => setIsModalVisible(true)}
+              onClick={handleAddETF}
               className="bg-indigo-600 hover:bg-indigo-700"
             >
               Add ETF
@@ -214,10 +233,10 @@ function Dashboard() {
                           </a>
                         </td>
                         <td className="px-6 py-4 text-center text-gray-700">
-                          {etf.lastPrice !== null ? `₹${etf.lastPrice}` : "--"}
+                          {etf.lastPrice !== null ? `₹${etf.lastPrice}` : "-"}
                         </td>
                         <td className="px-6 py-4 text-center text-gray-700">
-                          {etf.iNavValue !== null ? `₹${etf.iNavValue}` : "--"}
+                          {etf.iNavValue !== null ? `₹${etf.iNavValue}` : "-"}
                         </td>
                         <td
                           className={`px-6 py-4 text-center ${suggestionClass}`}
@@ -278,7 +297,8 @@ function Dashboard() {
                 style={{ width: "100%" }}
                 onSearch={handleSearch}
                 onSelect={handleSelect}
-                placeholder="Type ETF name (e.g. alpha)"
+                placeholder="Type ETF name"
+                value={searchValue}
               />
             </div>
             <div className="mt-4">
