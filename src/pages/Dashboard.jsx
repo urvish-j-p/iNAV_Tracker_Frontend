@@ -119,6 +119,11 @@ function Dashboard() {
     setOptions([]);
   };
 
+  const getSuggestion = (lastPrice, iNavValue) => {
+    if (lastPrice == null || iNavValue == null) return "--";
+    return lastPrice <= iNavValue ? "Buy" : "Wait";
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
       <div className="max-w-6xl mx-auto">
@@ -157,6 +162,9 @@ function Dashboard() {
                   <th className="px-6 py-3 text-center text-xl font-medium text-gray-500">
                     i-NAV Value
                   </th>
+                  <th className="px-6 py-3 text-center text-xl font-medium text-gray-500">
+                    Suggestion
+                  </th>
                   <th className="px-6 py-3 text-right text-xl font-medium text-gray-500">
                     Actions
                   </th>
@@ -165,7 +173,7 @@ function Dashboard() {
               <tbody className="bg-white divide-y divide-gray-200">
                 {loading ? (
                   <tr>
-                    <td colSpan={4}>
+                    <td colSpan={5}>
                       <div className="flex justify-center items-center h-64">
                         <Spin size="large" />
                       </div>
@@ -173,52 +181,70 @@ function Dashboard() {
                   </tr>
                 ) : etfs.length === 0 ? (
                   <tr>
-                    <td colSpan={4}>
+                    <td colSpan={5}>
                       <div className="flex justify-center items-center h-64">
                         <Empty description="No ETF has been added!" />
                       </div>
                     </td>
                   </tr>
                 ) : (
-                  etfs.map((etf) => (
-                    <tr key={etf._id}>
-                      <td className="px-6 py-4 whitespace-nowrap text-left">
-                        <a
-                          href={`https://www.nseindia.com/get-quotes/equity?symbol=${etf.link}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-indigo-600 hover:text-indigo-900 flex items-center"
+                  etfs.map((etf) => {
+                    const suggestion = getSuggestion(
+                      etf.lastPrice,
+                      etf.iNavValue
+                    );
+                    const suggestionClass =
+                      suggestion === "Buy"
+                        ? "text-green-600 font-semibold"
+                        : suggestion === "Wait"
+                        ? "text-yellow-600 font-semibold"
+                        : "text-gray-500";
+
+                    return (
+                      <tr key={etf._id}>
+                        <td className="px-6 py-4 whitespace-nowrap text-left">
+                          <a
+                            href={`https://www.nseindia.com/get-quotes/equity?symbol=${etf.link}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-indigo-600 hover:text-indigo-900 flex items-center"
+                          >
+                            {etf.name}
+                            <FiExternalLink className="ml-2" />
+                          </a>
+                        </td>
+                        <td className="px-6 py-4 text-center text-gray-700">
+                          {etf.lastPrice !== null ? `₹${etf.lastPrice}` : "--"}
+                        </td>
+                        <td className="px-6 py-4 text-center text-gray-700">
+                          {etf.iNavValue !== null ? `₹${etf.iNavValue}` : "--"}
+                        </td>
+                        <td
+                          className={`px-6 py-4 text-center ${suggestionClass}`}
                         >
-                          {etf.name}
-                          <FiExternalLink className="ml-2" />
-                        </a>
-                      </td>
-                      <td className="px-6 py-4 text-center text-gray-700">
-                        {etf.lastPrice !== null ? `₹${etf.lastPrice}` : "--"}
-                      </td>
-                      <td className="px-6 py-4 text-center text-gray-700">
-                        {etf.iNavValue !== null ? `₹${etf.iNavValue}` : "--"}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => handleEdit(etf)}
-                          className="text-indigo-600 hover:text-indigo-900 mr-4"
-                        >
-                          <FiEdit2 />
-                        </button>
-                        <Popconfirm
-                          title="Do you really want to delete this ETF?"
-                          onConfirm={() => handleDelete(etf._id)}
-                          okText="Yes"
-                          cancelText="No"
-                        >
-                          <button className="text-red-600 hover:text-red-900">
-                            <FiTrash2 />
+                          {suggestion}
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => handleEdit(etf)}
+                            className="text-indigo-600 hover:text-indigo-900 mr-4"
+                          >
+                            <FiEdit2 />
                           </button>
-                        </Popconfirm>
-                      </td>
-                    </tr>
-                  ))
+                          <Popconfirm
+                            title="Do you really want to delete this ETF?"
+                            onConfirm={() => handleDelete(etf._id)}
+                            okText="Yes"
+                            cancelText="No"
+                          >
+                            <button className="text-red-600 hover:text-red-900">
+                              <FiTrash2 />
+                            </button>
+                          </Popconfirm>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
