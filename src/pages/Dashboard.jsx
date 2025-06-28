@@ -4,7 +4,7 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import { FiEdit2, FiTrash2, FiExternalLink } from "react-icons/fi";
-import { Modal, Button, Input, Spin, Empty, Popconfirm } from "antd";
+import { Modal, Button, Spin, Empty, Popconfirm, AutoComplete } from "antd";
 import { TbLogout2 } from "react-icons/tb";
 
 function Dashboard() {
@@ -16,6 +16,7 @@ function Dashboard() {
   const [editingId, setEditingId] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [options, setOptions] = useState([]);
 
   useEffect(() => {
     fetchEtfs();
@@ -32,6 +33,34 @@ function Dashboard() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearch = async (query) => {
+    if (!query) return;
+    try {
+      const { data } = await axios.get(`${apiBaseUrl}/api/etfs/search-etf`, {
+        params: { query },
+      });
+
+      const content = data?.data?.content || [];
+      const results = content.map((etf) => ({
+        label: etf.title,
+        value: etf.title,
+        etfData: etf,
+      }));
+
+      setOptions(results);
+    } catch (error) {
+      setOptions([]);
+    }
+  };
+
+  const handleSelect = (value, option) => {
+    const { etfData } = option;
+    setFormData({
+      name: etfData.title,
+      link: etfData.nse_scrip_code || "",
+    });
   };
 
   const handleSubmit = async () => {
@@ -87,11 +116,12 @@ function Dashboard() {
     setIsModalVisible(false);
     setFormData({ name: "", link: "" });
     setEditingId(null);
+    setOptions([]);
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-indigo-600">i-NAV Tracker</h1>
           <div className="flex items-center space-x-4">
@@ -118,72 +148,84 @@ function Dashboard() {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-100">
                 <tr>
-                  <th className="px-6 py-3 text-left sm:text-center text-xl font-medium text-gray-500 tracking-wider lg:w-1/2 lg:text-center">
-                    {etfs?.length === 1 ? "ETF" : "ETFs"}
+                  <th className="px-6 py-3 text-left text-xl font-medium text-gray-500">
+                    ETFs
                   </th>
-                  <th className="px-6 py-3 mr-3 text-right sm:text-center text-xl font-medium text-gray-500 tracking-wider lg:w-1/2 lg:text-center">
+                  <th className="px-6 py-3 text-center text-xl font-medium text-gray-500">
+                    Current Price
+                  </th>
+                  <th className="px-6 py-3 text-center text-xl font-medium text-gray-500">
+                    i-NAV Value
+                  </th>
+                  <th className="px-6 py-3 text-right text-xl font-medium text-gray-500">
                     Actions
                   </th>
                 </tr>
               </thead>
-            </table>
-            <div className="overflow-y-auto max-h-[calc(100vh-160px)] custom-scrollbar">
-              {loading ? (
-                <div className="flex justify-center items-center h-64">
-                  <Spin size="large" />
-                </div>
-              ) : etfs?.length === 0 ? (
-                <div className="flex justify-center items-center h-64">
-                  <Empty description="No ETF has been added!" />
-                </div>
-              ) : (
-                <table className="min-w-full divide-y divide-gray-200">
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {etfs.map((etf) => (
-                      <tr key={etf._id}>
-                        {/* ETFs Column */}
-                        <td className="px-6 py-4 sm:px-36 whitespace-nowrap text-left lg:w-1/2 lg:text-center">
-                          <a
-                            href={etf.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-indigo-600 hover:text-indigo-900 flex items-center justify-start lg:justify-center text-wrap space-x-2"
-                          >
-                            <span className="whitespace-normal">
-                              {etf.name}
-                            </span>
-                            <FiExternalLink className="ml-2 flex-shrink-0" />
-                          </a>
-                        </td>
-
-                        {/* Actions Column */}
-                        <td className="whitespace-nowrap text-right px-10 sm:px-40 lg:w-1/2 lg:text-center">
-                          <button
-                            onClick={() => handleEdit(etf)}
-                            className="text-indigo-600 hover:text-indigo-900 mr-4"
-                          >
-                            <FiEdit2 />
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td colSpan={4}>
+                      <div className="flex justify-center items-center h-64">
+                        <Spin size="large" />
+                      </div>
+                    </td>
+                  </tr>
+                ) : etfs.length === 0 ? (
+                  <tr>
+                    <td colSpan={4}>
+                      <div className="flex justify-center items-center h-64">
+                        <Empty description="No ETF has been added!" />
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  etfs.map((etf) => (
+                    <tr key={etf._id}>
+                      <td className="px-6 py-4 whitespace-nowrap text-left">
+                        <a
+                          href={`https://www.nseindia.com/get-quotes/equity?symbol=${etf.link}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-indigo-600 hover:text-indigo-900 flex items-center"
+                        >
+                          {etf.name}
+                          <FiExternalLink className="ml-2" />
+                        </a>
+                      </td>
+                      <td className="px-6 py-4 text-center text-gray-700">
+                        {etf.lastPrice !== null ? `₹${etf.lastPrice}` : "--"}
+                      </td>
+                      <td className="px-6 py-4 text-center text-gray-700">
+                        {etf.iNavValue !== null ? `₹${etf.iNavValue}` : "--"}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => handleEdit(etf)}
+                          className="text-indigo-600 hover:text-indigo-900 mr-4"
+                        >
+                          <FiEdit2 />
+                        </button>
+                        <Popconfirm
+                          title="Do you really want to delete this ETF?"
+                          onConfirm={() => handleDelete(etf._id)}
+                          okText="Yes"
+                          cancelText="No"
+                        >
+                          <button className="text-red-600 hover:text-red-900">
+                            <FiTrash2 />
                           </button>
-                          <Popconfirm
-                            title="Do you really want to delete this ETF?"
-                            onConfirm={() => handleDelete(etf._id)}
-                            okText="Yes"
-                            cancelText="No"
-                          >
-                            <button className="text-red-600 hover:text-red-900">
-                              <FiTrash2 />
-                            </button>
-                          </Popconfirm>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              )}
-            </div>
+                        </Popconfirm>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
+        {/* Modal for Add/Edit ETF */}
         <Modal
           title={
             <div style={{ textAlign: "center" }}>
@@ -203,28 +245,14 @@ function Dashboard() {
           >
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                ETF Name
+                Search ETF
               </label>
-              <Input
-                type="text"
-                required
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                ETF Link
-              </label>
-              <Input
-                type="url"
-                required
-                value={formData.link}
-                onChange={(e) =>
-                  setFormData({ ...formData, link: e.target.value })
-                }
+              <AutoComplete
+                options={options}
+                style={{ width: "100%" }}
+                onSearch={handleSearch}
+                onSelect={handleSelect}
+                placeholder="Type ETF name (e.g. alpha)"
               />
             </div>
             <div className="mt-4">
@@ -232,6 +260,7 @@ function Dashboard() {
                 type="primary"
                 htmlType="submit"
                 block
+                disabled={!formData.name || !formData.link}
                 className="bg-indigo-600 text-white hover:bg-indigo-700"
               >
                 {editingId ? "Update ETF" : "Add ETF"}
