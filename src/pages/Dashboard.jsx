@@ -87,8 +87,8 @@ function Dashboard() {
       setFormData({ name: "", link: "" });
       setEditingId(null);
       setIsModalVisible(false);
-      setOptions([]); // Clear options after successful submit
-      setSearchValue(""); // Clear search value
+      setOptions([]);
+      setSearchValue("");
       fetchEtfs();
     } catch (error) {
       toast.error(error.response?.data?.message || "Operation failed");
@@ -98,8 +98,8 @@ function Dashboard() {
   const handleEdit = (etf) => {
     setFormData({ name: etf.name, link: etf.link });
     setEditingId(etf._id);
-    setOptions([]); // Clear options when editing
-    setSearchValue(""); // Clear search value when editing
+    setOptions([]);
+    setSearchValue("");
     setIsModalVisible(true);
   };
 
@@ -126,15 +126,15 @@ function Dashboard() {
     setIsModalVisible(false);
     setFormData({ name: "", link: "" });
     setEditingId(null);
-    setOptions([]); // Clear options when modal is cancelled
-    setSearchValue(""); // Clear search value when modal is cancelled
+    setOptions([]);
+    setSearchValue("");
   };
 
   const handleAddETF = () => {
     setFormData({ name: "", link: "" });
     setEditingId(null);
-    setOptions([]); // Clear options when adding new ETF
-    setSearchValue(""); // Clear search value when adding new ETF
+    setOptions([]);
+    setSearchValue("");
     setIsModalVisible(true);
   };
 
@@ -143,16 +143,105 @@ function Dashboard() {
     return lastPrice <= iNavValue ? "Buy" : "Wait";
   };
 
+  const getSuggestionClass = (suggestion) => {
+    if (suggestion === "Buy")
+      return "text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-full text-sm";
+    if (suggestion === "Wait")
+      return "text-yellow-600 font-semibold bg-yellow-50 px-3 py-1 rounded-full text-sm";
+    return "text-gray-500 px-3 py-1 text-sm";
+  };
+
+  // Enhanced ETF Card Component for all screen sizes
+  const ETFCard = ({ etf }) => {
+    const suggestion = getSuggestion(etf.lastPrice, etf.iNavValue);
+    const suggestionClass = getSuggestionClass(suggestion);
+
+    return (
+      <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200 h-full flex flex-col">
+        {/* ETF Name and Actions */}
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex-1 mr-3">
+            <a
+              href={`https://www.nseindia.com/get-quotes/equity?symbol=${etf.link}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-indigo-600 hover:text-indigo-800 inline-flex items-start font-medium text-base leading-tight group"
+            >
+              <span className="break-words flex-1 mr-2 group-hover:underline">
+                {etf.name}
+              </span>
+              <FiExternalLink className="flex-shrink-0 mt-1 opacity-70 group-hover:opacity-100" size={16} />
+            </a>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => handleEdit(etf)}
+              className="text-indigo-600 hover:text-indigo-800 p-2 hover:bg-indigo-50 rounded-lg transition-colors"
+              title="Edit ETF"
+            >
+              <FiEdit2 size={18} />
+            </button>
+            <Popconfirm
+              title="Delete this ETF?"
+              onConfirm={() => handleDelete(etf._id)}
+              okText="Yes"
+              cancelText="No"
+              placement="topRight"
+            >
+              <button 
+                className="text-red-600 hover:text-red-800 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                title="Delete ETF"
+              >
+                <FiTrash2 size={18} />
+              </button>
+            </Popconfirm>
+          </div>
+        </div>
+
+        {/* Price Information */}
+        <div className="grid grid-cols-2 gap-4 mb-4 flex-1">
+          <div className="text-center bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-3 border border-blue-100">
+            <div className="text-sm text-gray-600 mb-2 font-medium">
+              Current Price
+            </div>
+            <div className="font-bold text-gray-800 text-lg">
+              {etf.lastPrice !== null ? `₹${etf.lastPrice.toLocaleString()}` : "-"}
+            </div>
+          </div>
+          <div className="text-center bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg p-3 border border-purple-100">
+            <div className="text-sm text-gray-600 mb-2 font-medium">
+              i-NAV Value
+            </div>
+            <div className="font-bold text-gray-800 text-lg">
+              {etf.iNavValue !== null ? `₹${etf.iNavValue.toLocaleString()}` : "-"}
+            </div>
+          </div>
+        </div>
+
+        {/* Suggestion */}
+        <div className="flex justify-center mt-auto">
+          <span className={suggestionClass}>{suggestion}</span>
+        </div>
+      </div>
+    );
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-6 px-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-indigo-600">i-NAV Tracker</h1>
-          <div className="flex items-center space-x-4">
+    <div className="min-h-screen bg-gray-50 py-4 px-3 sm:py-6 sm:px-4">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-indigo-600">
+            i-NAV Tracker
+          </h1>
+          <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
             <Button
               type="primary"
               onClick={handleAddETF}
-              className="bg-indigo-600 hover:bg-indigo-700"
+              className="bg-indigo-600 hover:bg-indigo-700 flex-1 sm:flex-none"
+              size="large"
             >
               Add ETF
             </Button>
@@ -162,135 +251,51 @@ function Dashboard() {
               okText="Yes"
               cancelText="No"
             >
-              <TbLogout2 className="text-red-600 text-3xl cursor-pointer hover:text-red-700" />
+              <TbLogout2 className="text-red-600 text-2xl sm:text-3xl cursor-pointer hover:text-red-700 transition-colors" />
             </Popconfirm>
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-lg">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xl font-medium text-gray-500">
-                    ETFs
-                  </th>
-                  <th className="px-6 py-3 text-center text-xl font-medium text-gray-500">
-                    Current Price
-                  </th>
-                  <th className="px-6 py-3 text-center text-xl font-medium text-gray-500">
-                    i-NAV Value
-                  </th>
-                  <th className="px-6 py-3 text-center text-xl font-medium text-gray-500">
-                    Suggestion
-                  </th>
-                  <th className="px-6 py-3 text-right text-xl font-medium text-gray-500">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {loading ? (
-                  <tr>
-                    <td colSpan={5}>
-                      <div className="flex justify-center items-center h-64">
-                        <Spin size="large" />
-                      </div>
-                    </td>
-                  </tr>
-                ) : etfs.length === 0 ? (
-                  <tr>
-                    <td colSpan={5}>
-                      <div className="flex justify-center items-center h-64">
-                        <Empty description="No ETF has been added!" />
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  etfs.map((etf) => {
-                    const suggestion = getSuggestion(
-                      etf.lastPrice,
-                      etf.iNavValue
-                    );
-                    const suggestionClass =
-                      suggestion === "Buy"
-                        ? "text-green-600 font-semibold"
-                        : suggestion === "Wait"
-                        ? "text-yellow-600 font-semibold"
-                        : "text-gray-500";
-
-                    return (
-                      <tr key={etf._id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-left">
-                          <a
-                            href={`https://www.nseindia.com/get-quotes/equity?symbol=${etf.link}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-indigo-600 hover:text-indigo-900 flex items-center"
-                          >
-                            {etf.name}
-                            <FiExternalLink className="ml-2" />
-                          </a>
-                        </td>
-                        <td className="px-6 py-4 text-center text-gray-700">
-                          {etf.lastPrice !== null ? `₹${etf.lastPrice}` : "-"}
-                        </td>
-                        <td className="px-6 py-4 text-center text-gray-700">
-                          {etf.iNavValue !== null ? `₹${etf.iNavValue}` : "-"}
-                        </td>
-                        <td
-                          className={`px-6 py-4 text-center ${suggestionClass}`}
-                        >
-                          {suggestion}
-                        </td>
-                        <td className="px-6 py-4 text-right">
-                          <button
-                            onClick={() => handleEdit(etf)}
-                            className="text-indigo-600 hover:text-indigo-900 mr-4"
-                          >
-                            <FiEdit2 />
-                          </button>
-                          <Popconfirm
-                            title="Do you really want to delete this ETF?"
-                            onConfirm={() => handleDelete(etf._id)}
-                            okText="Yes"
-                            cancelText="No"
-                            placement="left"
-                          >
-                            <button className="text-red-600 hover:text-red-900">
-                              <FiTrash2 />
-                            </button>
-                          </Popconfirm>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <Spin size="large" />
           </div>
-        </div>
+        ) : etfs.length === 0 ? (
+          <div className="flex justify-center items-center h-64">
+            <Empty description="No ETF has been added!" />
+          </div>
+        ) : (
+          /* Responsive Card Grid */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {etfs.map((etf) => (
+              <ETFCard key={etf._id} etf={etf} />
+            ))}
+          </div>
+        )}
 
         {/* Modal for Add/Edit ETF */}
         <Modal
           title={
-            <div style={{ textAlign: "center" }}>
+            <div style={{ textAlign: "center", fontSize: "18px", fontWeight: "600" }}>
               {editingId ? "Edit ETF" : "Add ETF"}
             </div>
           }
           open={isModalVisible}
           onCancel={handleModalCancel}
           footer={null}
+          width={window.innerWidth < 640 ? "90%" : 520}
+          centered
         >
           <form
             onSubmit={(e) => {
               e.preventDefault();
               handleSubmit();
             }}
-            className="space-y-4"
+            className="space-y-6 mt-6"
           >
             <div>
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Search ETF
               </label>
               <AutoComplete
@@ -298,17 +303,20 @@ function Dashboard() {
                 style={{ width: "100%" }}
                 onSearch={handleSearch}
                 onSelect={handleSelect}
-                placeholder="Type ETF name"
+                placeholder="Type ETF name to search..."
                 value={searchValue}
+                size="large"
+                className="rounded-lg"
               />
             </div>
-            <div className="mt-4">
+            <div className="pt-2">
               <Button
                 type="primary"
                 htmlType="submit"
                 block
                 disabled={!formData.name || !formData.link}
-                className="bg-indigo-600 text-white hover:bg-indigo-700"
+                className="bg-indigo-600 text-white hover:bg-indigo-700 h-12 text-base font-medium"
+                size="large"
               >
                 {editingId ? "Update ETF" : "Add ETF"}
               </Button>
