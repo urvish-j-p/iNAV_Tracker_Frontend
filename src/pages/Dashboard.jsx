@@ -231,28 +231,77 @@ function Dashboard() {
   return (
     <div className="min-h-screen bg-gray-50 py-4 px-3 sm:py-6 sm:px-4">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 space-y-4 sm:space-y-0">
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-indigo-600">
-            i-NAV Tracker
-          </h1>
-          <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
-            <Button
-              type="primary"
-              onClick={handleAddETF}
-              className="bg-indigo-600 hover:bg-indigo-700 flex-1 sm:flex-none"
-              size="large"
-            >
-              Add ETF
-            </Button>
-            <Popconfirm
-              title="Do you really want to logout?"
-              onConfirm={handleLogout}
-              okText="Yes"
-              cancelText="No"
-            >
-              <TbLogout2 className="text-red-600 text-2xl sm:text-3xl cursor-pointer hover:text-red-700 transition-colors" />
-            </Popconfirm>
+        {/* Enhanced Header */}
+        <div className="relative mb-8 sm:mb-12">
+          {/* Background Pattern */}
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 rounded-3xl opacity-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl"></div>
+          
+          {/* Decorative shapes */}
+          <div className="absolute top-4 right-8 w-20 h-20 bg-gradient-to-br from-indigo-200 to-purple-300 rounded-full opacity-20 animate-pulse"></div>
+          <div className="absolute bottom-6 left-12 w-12 h-12 bg-gradient-to-br from-pink-200 to-rose-300 rounded-lg rotate-45 opacity-30"></div>
+          <div className="absolute top-8 left-1/3 w-6 h-6 bg-gradient-to-br from-blue-300 to-indigo-400 rounded-full opacity-40 animate-bounce"></div>
+          
+          <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center p-6 sm:p-8 space-y-6 sm:space-y-0">
+            {/* Title Section */}
+            <div className="flex items-center space-x-4">
+              {/* Icon */}
+              <div className="flex-shrink-0 w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg transform rotate-3 hover:rotate-0 transition-transform duration-300">
+                <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              
+              {/* Title and Subtitle */}
+              <div>
+                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent leading-tight">
+                  i-NAV Tracker
+                </h1>
+                <p className="text-sm sm:text-base text-gray-600 mt-1 font-medium">
+                  Smart ETF Investment Insights
+                </p>
+              </div>
+            </div>
+
+            {/* Action Section */}
+            <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
+              {/* Stats Badge */}
+              <div className="hidden sm:flex items-center bg-white/80 backdrop-blur-sm rounded-full px-4 py-2 border border-indigo-100 shadow-sm">
+                <div className="w-2 h-2 bg-green-400 rounded-full mr-2 animate-pulse"></div>
+                <span className="text-sm font-medium text-gray-700">
+                  {etfs.length} ETF{etfs.length !== 1 ? 's' : ''} Tracked
+                </span>
+              </div>
+              
+              {/* Add ETF Button */}
+              <Button
+                type="primary"
+                onClick={handleAddETF}
+                className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 border-0 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 flex-1 sm:flex-none h-12 px-6 font-semibold"
+                size="large"
+              >
+                <span className="flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add ETF
+                </span>
+              </Button>
+              
+              {/* Logout Button */}
+              <Popconfirm
+                title="Do you really want to logout?"
+                onConfirm={handleLogout}
+                okText="Yes"
+                cancelText="No"
+                placement="bottomRight"
+              >
+                <button className="group relative bg-white/80 backdrop-blur-sm hover:bg-red-50 p-3 rounded-xl border border-red-100 hover:border-red-200 transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md">
+                  <TbLogout2 className="text-red-500 group-hover:text-red-600 text-xl transition-colors" />
+                  <div className="absolute -inset-1 bg-gradient-to-r from-red-200 to-pink-200 rounded-xl opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
+                </button>
+              </Popconfirm>
+            </div>
           </div>
         </div>
 
