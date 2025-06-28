@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import toast from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
-import { FiEdit2, FiTrash2, FiExternalLink } from "react-icons/fi";
+import { FiEdit2, FiTrash2, FiExternalLink, FiCheck, FiClock } from "react-icons/fi";
 import { Modal, Button, Spin, Empty, Popconfirm, AutoComplete } from "antd";
 import { TbLogout2 } from "react-icons/tb";
 
@@ -145,16 +145,23 @@ function Dashboard() {
 
   const getSuggestionClass = (suggestion) => {
     if (suggestion === "Buy")
-      return "text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-full text-sm";
+      return "text-green-600 font-semibold bg-green-50 px-3 py-1 rounded-full text-sm flex items-center space-x-1";
     if (suggestion === "Wait")
-      return "text-yellow-600 font-semibold bg-yellow-50 px-3 py-1 rounded-full text-sm";
+      return "text-yellow-600 font-semibold bg-yellow-50 px-3 py-1 rounded-full text-sm flex items-center space-x-1";
     return "text-gray-500 px-3 py-1 text-sm";
+  };
+
+  const getSuggestionIcon = (suggestion) => {
+    if (suggestion === "Buy") return <FiCheck size={14} />;
+    if (suggestion === "Wait") return <FiClock size={14} />;
+    return null;
   };
 
   // Enhanced ETF Card Component for all screen sizes
   const ETFCard = ({ etf }) => {
     const suggestion = getSuggestion(etf.lastPrice, etf.iNavValue);
     const suggestionClass = getSuggestionClass(suggestion);
+    const suggestionIcon = getSuggestionIcon(suggestion);
 
     return (
       <div className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200 h-full flex flex-col">
@@ -222,7 +229,10 @@ function Dashboard() {
 
         {/* Suggestion */}
         <div className="flex justify-center mt-auto">
-          <span className={suggestionClass}>{suggestion}</span>
+          <span className={suggestionClass}>
+            {suggestionIcon}
+            <span>{suggestion}</span>
+          </span>
         </div>
       </div>
     );
