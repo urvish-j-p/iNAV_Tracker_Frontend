@@ -169,7 +169,7 @@ function Dashboard() {
         <div className="flex justify-between items-start mb-4">
           <div className="flex-1 mr-3">
             <a
-              href={`https://www.nseindia.com/get-quotes/equity?symbol=${etf.link}`}
+              href={`https://www.nseindia.com/get-quote/equity/${etf.link}/${etf.link.toLowerCase()}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-indigo-600 hover:text-indigo-800 inline-flex items-start font-medium text-base leading-tight group"
